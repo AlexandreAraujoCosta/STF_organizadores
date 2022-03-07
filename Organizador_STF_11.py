@@ -59,10 +59,15 @@ for item in dados:
     andamentos = item[7]  
     recursos = item[8] 
     
+    
     # Extrai dados do campo html_IP
     
     eletronico_fisico = dsd.extrair(html_IP,'bg-primary">','</span>')
     eletronico_fisico = eletronico_fisico.replace('Processo Eletrônico','E')
+    if eletronico_fisico != 'E':
+        eletronico_fisico = dsd.extrair(html_IP,'bg-default">','</span>')
+        eletronico_fisico = eletronico_fisico.replace(
+            'Processo Físico','F')
     
     sigilo = dsd.extrair(html_IP,'bg-success">','</span>').upper()
     sigilo = sigilo.replace('PÚBLICO','P')
@@ -131,7 +136,7 @@ for item in dados:
         ### Remove acentos
         pedido_de_liminar_CC = dsd.remover_acentos(pedido_de_liminar_CC)
         ### Extrai a informação sobre pedido de liminar na petição inicial
-        if '(MED. LIMINAR)' in pedido_de_liminar_CC:
+        if 'LIMINAR' in pedido_de_liminar_CC:
          	pedido_de_liminar_CC = 'SIM'
         ### Reduz o nome da ação para a sigla ADI
         pedido_de_liminar_CC = pedido_de_liminar_CC.replace(
@@ -183,10 +188,20 @@ for item in dados:
         ### Extrai o inciso com o tipo do requerente
         if '103,' in requerente_CC:
             requerente_CC = requerente_CC.split('103,')[1]
+        else:
+            requerente_CC = 'NA'
             ### limpa o tipo do requerente
-            requerente_CC = requerente_CC.strip()
-            requerente_CC = requerente_CC.strip('0')
-            requerente_CC = requerente_CC.strip(')')
+        requerente_CC = dsd.limpar(requerente_CC)
+        requerente_CC = requerente_CC.strip(',')
+        requerente_CC = requerente_CC.strip()
+        requerente_CC = requerente_CC.strip('0')
+        requerente_CC = requerente_CC.strip('0')
+        requerente_CC = requerente_CC.strip('(')
+        requerente_CC = requerente_CC.strip(')')
+        requerente_CC = requerente_CC.strip('2')
+        requerente_CC = requerente_CC.strip('CF')
+        requerente_CC = dsd.limpar(requerente_CC)
+
         # Converte o campo requerente em tipo de requerente
         requerente_tipo_CC = requerente_CC
         
@@ -221,11 +236,17 @@ for item in dados:
         ### Corrige dados fora do padrão
         resultado_liminar_CC = resultado_liminar_CC.replace('MONOACRATICA',
                                                             'MONOCRATICA')
+        resultado_liminar_CC = resultado_liminar_CC.replace('MONICRATICA',
+                                                            'MONOCRATICA')
+        resultado_liminar_CC = resultado_liminar_CC.replace('MONOCRATICO',
+                                                            'MONOCRATICA')
         resultado_liminar_CC = resultado_liminar_CC.replace('LIMINAR ','')
         ### Gera campo órgão nos casos de decisão monocrática
         if 'DECISAO MONOCRATICA - ' in resultado_liminar_CC:
             resultado_liminar_CC = resultado_liminar_CC.replace(
                                                     'DECISAO MONOCRATICA -','')
+            resultado_liminar_CC = resultado_liminar_CC.replace(
+                                                    'DECISAO MONOCRATICA ','')
             orgao_liminar_CC = 'MONOCRATICA'
        
             
@@ -267,64 +288,67 @@ for item in dados:
         if 'PREVENCAO' in indexacao_CC:
             prevencao_CC = dsd.extrair(indexacao_CC, 'PREVENCAO - ', '\n')
             indexacao_CC = dsd.extrair(indexacao_CC, prevencao_CC,'')
+        indexacao_CC = dsd.limpar(indexacao_CC)
     
     
     # Define os dados a serem gravados
-    dados_processo =   [processo,
-                        incidente,
-                        protocolo_data,
-                        eletronico_fisico,
-                        sigilo,
-                        numerounico,
-                        assuntos,
-                        orgaodeorigem,
-                        origem_sigla,
-                        numerodeorigem,
-                        pedido_de_liminar_CC,
-                        origem_CC,
-                        entrada_CC,
-                        relator_CC,
-                        requerente_tipo_CC,
-                        fundamento_CC,
-                        resultado_liminar_CC,
-                        orgao_liminar_CC,
-                        resultado_final_CC,
-                        orgao_resultado_final_CC,
-                        monocratica_final_CC,
-                        indexacao_CC,
-                        prevencao_CC]
+    if incidente != 'NA' and incidente != '':
     
-    # Grava csv
-    print (f'Processando {processo}')
-    dsd.write_csv_header(arquivo,
-                        '''processo,
-                        incidente,
-                        protocolo_data,
-                        eletronico_fisico,
-                        sigilo,
-                        numerounico,
-                        assuntos,
-                        orgaodeorigem,
-                        origem_sigla,
-                        numerodeorigem,
-                        pedido_de_liminar_CC,
-                        origem_CC,
-                        entrada_CC,
-                        relator_CC,
-                        requerente_tipo_CC,
-                        fundamento_CC,
-                        resultado_liminar_CC,
-                        orgao_liminar_CC,
-                        resultado_final_CC,
-                        orgao_resultado_final_CC,
-                        monocratica_final_CC,
-                        indexacao_CC,
-                        prevencao_CC''')
-    dsd.write_csv_row(arquivo,dados_processo)
-    
-    # Grava o arquivo com os dispositivos legais impugnados
-    dsd.write_csv_header('dispositivos_CC.txt','processo,dispositivo')
-    dsd.write_csv_row('dispositivos_CC.txt',[processo,dispositivo_CC])
+        dados_processo =   [processo,
+                            incidente,
+                            protocolo_data,
+                            eletronico_fisico,
+                            sigilo,
+                            numerounico,
+                            assuntos,
+                            orgaodeorigem,
+                            origem_sigla,
+                            origem_CC,
+                            numerodeorigem,
+                            pedido_de_liminar_CC,
+                            entrada_CC,
+                            relator_CC,
+                            requerente_tipo_CC,
+                            fundamento_CC,
+                            resultado_liminar_CC,
+                            orgao_liminar_CC,
+                            resultado_final_CC,
+                            orgao_resultado_final_CC,
+                            monocratica_final_CC,
+                            indexacao_CC,
+                            prevencao_CC]
+        
+        # Grava csv
+        print (f'Processando {processo}')
+        dsd.write_csv_header(arquivo,
+                            '''processo,
+                            incidente,
+                            protocolo_data,
+                            eletronico_fisico,
+                            sigilo,
+                            numerounico,
+                            assuntos,
+                            orgaodeorigem,
+                            origem_sigla,
+                            origem_CC,
+                            numerodeorigem,
+                            pedido_de_liminar_CC,
+                            entrada_CC,
+                            relator_CC,
+                            requerente_tipo_CC,
+                            fundamento_CC,
+                            resultado_liminar_CC,
+                            orgao_liminar_CC,
+                            resultado_final_CC,
+                            orgao_resultado_final_CC,
+                            monocratica_final_CC,
+                            indexacao_CC,
+                            prevencao_CC''')
+        dsd.write_csv_row(arquivo,dados_processo)
+        
+        # Grava o arquivo com os dispositivos legais impugnados
+        dsd.write_csv_header('dispositivos_CC.txt','processo,dispositivo')
+        dsd.write_csv_row('dispositivos_CC.txt',[processo,dispositivo_CC])
 
 # Grava mensagem de finalização do progama com êxito
 print (f'Gravado arquivo {arquivo}')
