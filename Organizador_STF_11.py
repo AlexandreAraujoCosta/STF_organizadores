@@ -1,7 +1,7 @@
 import dsd
 
 # Importa dados do arquivo indicado como parâmetro
-dados = dsd.csv_to_list('InformacoesProcessuais5.txt')
+dados = dsd.csv_to_list('InformacoesProcessuais.txt')
 
 # Coloca os dados em ordem alfabética decrescente
 dados.sort(reverse = True)
